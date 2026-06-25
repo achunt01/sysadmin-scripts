@@ -1,72 +1,137 @@
-﻿# ================================
-# CONFIG
-# ================================
+<#
+.SYNOPSIS
+    Adds a Windows Firewall application allow rule to a Group Policy Object.
+
+.DESCRIPTION
+    Creates or reuses a named GPO and adds a WFAS firewall allow rule for a
+    specified application path. Prompts for rule name, program path, direction,
+    and network profile. Useful for standardizing approved application firewall
+    rules across a domain without touching local firewall policy directly.
+
+    Requires the GroupPolicy and ActiveDirectory modules (RSAT).
+
+.EXAMPLE
+    .\Add-GPOFirewallRule.ps1
+
+    Runs interactively. Creates the GPO if it doesn't exist, then prompts
+    for rule details.
+
+.NOTES
+    Author  : Amanda Hunt
+    Version : 1.0
+    Tested  : Windows Server 2019/2022 with RSAT installed
+
+    Requirements:
+      - Run as a user with GPO edit rights in the domain
+      - GroupPolicy module (RSAT: Group Policy Management Tools)
+      - ActiveDirectory module (RSAT: AD DS Tools)
+
+    The GPO must be linked to an OU separately after creation.
+#>
+
+# ============================================================
+# CONFIG — change this if you want a different target GPO name
+# ============================================================
+
 $GpoName = "Approved Applications - Firewall"
 
-# ================================
-# CHECK FOR EXISTING GPO
-# ================================
+# ============================================================
+# MODULE CHECK — fail early if RSAT isn't present
+# ============================================================
+
+foreach ($module in @('GroupPolicy', 'ActiveDirectory')) {
+    if (-not (Get-Module -ListAvailable -Name $module)) {
+        Write-Host "Required module '$module' is not available. Install RSAT and try again." -ForegroundColor Red
+        return
+    }
+}
+
 Import-Module GroupPolicy
+Import-Module ActiveDirectory
+
+# ============================================================
+# GPO — create it if it doesn't exist, reuse it if it does
+# ============================================================
 
 $gpo = Get-GPO -Name $GpoName -ErrorAction SilentlyContinue
 
 if (-not $gpo) {
-    Write-Host "GPO '$GpoName' not found. Creating it..."
-    $gpo = New-GPO -Name $GpoName -Comment "WFAS Firewall rules for approved applications"
-    Write-Host "GPO '$GpoName' created successfully."
-} else {
-    Write-Host "GPO '$GpoName' already exists. Using existing GPO."
+    Write-Host "`nGPO '$GpoName' not found. Creating it..." -ForegroundColor Cyan
+    $gpo = New-GPO -Name $GpoName -Comment "WFAS firewall rules for approved applications"
+    Write-Host "GPO '$GpoName' created. Remember to link it to the appropriate OU." -ForegroundColor Yellow
+}
+else {
+    Write-Host "`nGPO '$GpoName' already exists. Adding rule to existing GPO." -ForegroundColor Cyan
 }
 
-# ================================
+# ============================================================
 # PROMPTS
-# ================================
+# ============================================================
 
-# Ask for rule name
-$RuleName = Read-Host "Enter the firewall rule name"
+$RuleName = Read-Host "`nFirewall rule name"
 
-# Ask for program path
-$ProgramPath = Read-Host "Enter the full program path (e.g. C:\Program Files\App\App.exe)"
+$ProgramPath = Read-Host "Full program path (e.g. C:\Program Files\App\App.exe)"
 
-# Ask for direction (default = Inbound)
-$Direction = Read-Host "Direction? (Inbound/Outbound) [Default: Inbound]"
+# Validate the path looks reasonable — won't catch everything but
+# catches obvious mistakes like a missing .exe extension.
+if ($ProgramPath -notmatch '\.exe$') {
+    Write-Host "  Path doesn't end in .exe — double check this before deploying." -ForegroundColor Yellow
+}
+
+$Direction = Read-Host "Direction (Inbound/Outbound) [Default: Inbound]"
 if ([string]::IsNullOrWhiteSpace($Direction)) {
     $Direction = "Inbound"
 }
 
-# Confirm Domain-only profile (default = Yes)
-$DomainOnly = Read-Host "Apply to DOMAIN profile only? (Y/n) [Default: Y]"
-if ([string]::IsNullOrWhiteSpace($DomainOnly) -or $DomainOnly -eq "Y" -or $DomainOnly -eq "y") {
+# Normalize capitalization so New-NetFirewallRule doesn't complain.
+$Direction = (Get-Culture).TextInfo.ToTitleCase($Direction.ToLower())
+
+$DomainOnly = Read-Host "Apply to Domain profile only? (Y/n) [Default: Y]"
+if ([string]::IsNullOrWhiteSpace($DomainOnly) -or $DomainOnly -match '^[Yy]$') {
     $Profile = "Domain"
-} else {
-    # If not domain-only, allow user to specify the profile set
-    $Profile = Read-Host "Enter profile name(s) (Domain, Private, Public, Any)"
+}
+else {
+    $Profile = Read-Host "Profile(s) to apply (Domain, Private, Public, Any)"
 }
 
-# ================================
-# BUILD POLICY STORE
-# ================================
+# ============================================================
+# SUMMARY — confirm before writing anything
+# ============================================================
+
+Write-Host "`n--- Rule Summary ---" -ForegroundColor Cyan
+Write-Host "GPO       : $GpoName"
+Write-Host "Rule name : $RuleName"
+Write-Host "Program   : $ProgramPath"
+Write-Host "Direction : $Direction"
+Write-Host "Profile   : $Profile"
+Write-Host "--------------------`n"
+
+$confirm = Read-Host "Proceed? (Y/n) [Default: Y]"
+if (-not [string]::IsNullOrWhiteSpace($confirm) -and $confirm -notmatch '^[Yy]$') {
+    Write-Host "Cancelled." -ForegroundColor Yellow
+    return
+}
+
+# ============================================================
+# CREATE THE RULE
+# ============================================================
+
 $domain = (Get-ADDomain).DNSRoot
 $PolicyStorePath = "$domain\$GpoName"
 
-Write-Host "`nAdding rule to GPO: $GpoName"
-Write-Host "Rule: $RuleName"
-Write-Host "Program: $ProgramPath"
-Write-Host "Direction: $Direction"
-Write-Host "Profile: $Profile"
-Write-Host "Policy Store: $PolicyStorePath"
-Write-Host ""
+try {
+    New-NetFirewallRule `
+        -DisplayName $RuleName `
+        -Program $ProgramPath `
+        -Direction $Direction `
+        -Action Allow `
+        -Enabled True `
+        -Profile $Profile `
+        -PolicyStore $PolicyStorePath `
+        -ErrorAction Stop
 
-# ================================
-# CREATE WFAS FIREWALL RULE
-# ================================
-New-NetFirewallRule `
-    -DisplayName $RuleName `
-    -Program $ProgramPath `
-    -Direction $Direction `
-    -Action Allow `
-    -Enabled True `
-    -Profile $Profile `
-    -PolicyStore $PolicyStorePath
-
-Write-Host "`n✅ Firewall rule '$RuleName' added to GPO '$GpoName' successfully."
+    Write-Host "Firewall rule '$RuleName' added to GPO '$GpoName' successfully." -ForegroundColor Green
+}
+catch {
+    Write-Host "Failed to create firewall rule: $_" -ForegroundColor Red
+}
