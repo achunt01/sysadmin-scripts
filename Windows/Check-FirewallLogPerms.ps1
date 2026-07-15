@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Ensures the Windows Firewall log folder exists with the right permissions.
+
+.DESCRIPTION
+    Verifies %systemroot%\System32\LogFiles\Firewall exists and that NT SERVICE\MpsSvc
+    has Write and Modify access; creates the folder and/or fixes the ACL if needed.
+    Built to run as SYSTEM via RMM. Exit 0 = already correct or remediated, exit 1 =
+    remediation failed (worth a ticket).
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
+
 # Check-FirewallLogPerms.ps1
 # Verifies %systemroot%\System32\LogFiles\Firewall exists and
 # that NT SERVICE\MpsSvc has Write and Modify access.

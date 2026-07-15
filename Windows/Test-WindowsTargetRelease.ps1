@@ -1,6 +1,21 @@
+<#
+.SYNOPSIS
+    RMM condition — checks whether a device is on the org's target Windows version.
+
+.DESCRIPTION
+    Reads the NinjaOne org custom field workstationTargetVersion and compares it to the
+    device's TargetReleaseVersionInfo registry value. Exit 0 if the field is unset or
+    matches; exit 1 (condition met) if it's set but doesn't match, so Ninja can flag the
+    device for an upgrade.
+
+.NOTES
+    Author: Amanda Hunt - 9/18/2025
+    exit 0 = condition ends, exit 1 = condition matched.
+#>
+
 # Amanda Hunt - 9/18/2025
 
-# Pulls the org custom field workstationTargetVersion 
+# Pulls the org custom field workstationTargetVersion
 # Reads the registry TargetReleaseVersionInfo on the device
 # If the org custom field doesn’t exist, exit 0
 # If it exists and matches the registry value, exit 0

@@ -1,3 +1,21 @@
+<#
+.SYNOPSIS
+    Installs the SentinelOne (S1) agent by pulling the package from the S1 API.
+
+.DESCRIPTION
+    Authenticates to the SentinelOne management console with a server hostname and
+    API token, downloads the matching agent installer, and installs it against the
+    supplied site token. Built to run unattended from an RMM as SYSTEM.
+
+    Fill in $Server and $ApiToken before use, and pass the site token via -siteToken.
+
+.PARAMETER siteToken
+    The SentinelOne site token the agent should register against.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated. Keep the API token out of source control.
+#>
 param (
     [string]$siteToken=''
 )

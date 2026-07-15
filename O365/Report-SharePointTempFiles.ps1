@@ -1,3 +1,17 @@
+<#
+.SYNOPSIS
+    Reports orphaned SharePoint "~$" Office temp files across the listed sites.
+
+.DESCRIPTION
+    Connects to each SharePoint site in $Sites via PnP, walks the document libraries
+    for leftover "~$" lock/temp files that Office sometimes leaves behind, and writes
+    the findings to a CSV. Read-only — it reports, it doesn't delete.
+
+.NOTES
+    Author: Amanda Hunt
+    Requires PnP.PowerShell. Update $Sites and $ReportPath before running.
+#>
+
 # ==============================
 #  SharePoint "~$" Temp File Report
 # ==============================

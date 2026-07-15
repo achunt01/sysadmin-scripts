@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Reports missing Windows updates by querying the Windows Update Agent directly.
+
+.DESCRIPTION
+    Talks straight to the Windows Update Agent (WUA) COM API instead of PSWindowsUpdate
+    — this avoids the ArgumentException that hits when update metadata is malformed.
+    Searches Microsoft Update (drivers and apps included) for anything not installed and
+    writes the list into an RMM (NinjaOne) custom field.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
+
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 

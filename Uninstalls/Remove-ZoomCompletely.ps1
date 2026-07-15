@@ -1,3 +1,17 @@
+<#
+.SYNOPSIS
+    Completely removes Zoom from every system and user-profile location.
+
+.DESCRIPTION
+    Rips out Zoom across all system and per-user paths without relying on %APPDATA%,
+    so it works when run as SYSTEM from an RMM. Logs to stdout and a timestamped file.
+    Do a fresh Zoom install afterward if the machine still needs it.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated (SYSTEM via RMM is fine).
+#>
+
 # Remove-ZoomCompletely.ps1
 # Performs a complete Zoom removal across all system and user-profile paths.
 # Designed to run as SYSTEM (e.g. via NinjaRMM) -- doesn't rely on %APPDATA%.

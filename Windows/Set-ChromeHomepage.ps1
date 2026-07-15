@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Sets the Chrome startup/homepage URL via policy registry keys.
+
+.DESCRIPTION
+    Creates the Google Chrome policy keys if they don't exist and sets the startup
+    ("restore on startup") URL to the value passed in. Applies machine-wide under HKLM.
+
+.PARAMETER url
+    The homepage / startup URL to enforce.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
 param (
     [string]$url = ""
 )

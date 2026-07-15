@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Installs pending Windows updates without rebooting, skipping Preview updates.
+
+.DESCRIPTION
+    Uses the Windows Update Agent (WUA) COM API directly (same reasoning as the missing-
+    updates script — dodges the malformed-metadata ArgumentException). Searches for
+    updates that aren't installed, filters out Preview releases, installs the rest, and
+    suppresses the reboot so it can be scheduled separately.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated. A reboot is still required afterward to finish some updates.
+#>
+
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 

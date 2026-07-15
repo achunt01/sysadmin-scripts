@@ -40,6 +40,9 @@ macOS/                     macOS monitoring
 | Script | Description |
 |--------|-------------|
 | `Remove-ZoomCompletely.ps1` | Complete Zoom removal across all system and user-profile paths; built to run as SYSTEM and log to a timestamped file. Reinstall Zoom fresh afterward |
+| `Get-McAfeeFootprint.ps1` | Read-only inventory of McAfee's presence — uninstall keys, AppX packages, services, processes, and folders. Run before/after a removal to confirm state |
+| `Get-McAfeeRegistryRemnants.ps1` | Deep read-only registry sweep for McAfee remnants across all hives (including per-user `NTUSER.DAT` and MSI Installer products); logs findings to file |
+| `Remove-McAfeeWPSCompletely.ps1` | Two-phase forced removal of McAfee WPS for when the official MCPR tool fails. Phase 1 strips services/keys/AppX and queues locked files; Phase 2 finishes cleanup on next boot as SYSTEM |
 
 ## O365 (Microsoft 365)
 
@@ -124,7 +127,7 @@ Install-Module Microsoft.Graph
 - Update-related scripts talk to the Windows Update Agent (WUA) COM API directly rather than PSWindowsUpdate, which avoids the `ArgumentException` that occurs when update metadata is malformed.
 - The SharePoint deletion script recycles files rather than permanently deleting them — recovery is possible from the site recycle bin.
 - The .NET remediation scripts refuse to uninstall runtimes that are actively in use, and honor a host-exclusion list.
-- Scripts with a `.SYNOPSIS` / `.DESCRIPTION` block support `Get-Help .\ScriptName.ps1` for detail without opening the file.
+- Every PowerShell script carries a comment-based help block — run `Get-Help .\ScriptName.ps1` for the synopsis, description, and parameters without opening the file.
 
 ---
 

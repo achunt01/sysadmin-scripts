@@ -1,0 +1,29 @@
+# OneDrive / Windows sync junk
+desktop.ini
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+*.lnk
+
+# macOS junk (in case a file lands here from a Mac)
+.DS_Store
+
+# Editor / IDE
+.vs/
+.vscode/
+*.swp
+*~
+
+# Local secrets — keep tokens and keys out of the public repo
+secrets.ps1
+*.secret.ps1
+*.env
+*.key
+*.pfx
+*.pem
+
+# Local test output / scratch
+*.log
+*.tmp
+/temp/
+/scratch/

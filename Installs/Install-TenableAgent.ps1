@@ -1,3 +1,16 @@
+<#
+.SYNOPSIS
+    Installs (or verifies) the Tenable Nessus Agent.
+
+.DESCRIPTION
+    Checks the standard Program Files locations for an existing Nessus Agent install
+    and installs it if the service binary isn't already present. Intended to run
+    unattended from an RMM.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
 param (
     [string]$variable1 = ''
 )

@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Sets the Microsoft Edge home button / startup page via policy registry keys.
+
+.DESCRIPTION
+    Writes the Edge policy and customization registry values so the home button and
+    startup page point at the supplied URL. Applies machine-wide.
+
+.PARAMETER HomeButtonPage
+    The URL to set as the Edge home button / startup page. Defaults to Google.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
 param (
     [string]$HomeButtonPage = "https://www.google.com/"
 )

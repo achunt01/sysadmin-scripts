@@ -1,3 +1,16 @@
+<#
+.SYNOPSIS
+    Self-healing Nessus Agent deployment with a grace period to prevent churn.
+
+.DESCRIPTION
+    A newer take on the Tenable Nessus Agent install for RMM use. Writes a timestamp
+    stamp file after each run and skips re-running inside a short grace window, so
+    repeated policy passes don't reinstall or restart the agent unnecessarily.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated. Stamp file: C:\ProgramData\nessus_last_fix.txt
+#>
 param (
     [string]$variable1 = ''
 )

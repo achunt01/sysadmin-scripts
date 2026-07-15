@@ -1,3 +1,17 @@
+<#
+.SYNOPSIS
+    Installs winget (App Installer) if it's missing, otherwise upgrades it.
+
+.DESCRIPTION
+    Checks whether winget is available. If not, it bootstraps the install via the
+    winget-install script from PSGallery (machine needs a restart afterward). If winget
+    is already present, it just upgrades App Installer to the latest version.
+
+.NOTES
+    Author: Amanda Hunt
+    Run elevated.
+#>
+
 #if winget is not installed, install winget:
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Host "Winget not found. Installing winget..." -ForegroundColor Yellow

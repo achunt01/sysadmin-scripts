@@ -1,3 +1,16 @@
+<#
+.SYNOPSIS
+    Sets temporary passwords for Microsoft 365 users via Microsoft Graph.
+
+.DESCRIPTION
+    Ensures the Microsoft.Graph module is available, connects to Graph, and resets
+    the specified users' passwords to a temporary value (forcing a change at next
+    sign-in). Handy for bulk onboarding or after a suspected account compromise.
+
+.NOTES
+    Author: Amanda Hunt
+    Requires Microsoft.Graph and an admin account with User Administrator rights.
+#>
 Write-Host "Checking for MSGraph module..."
 
 $Module = Get-Module -Name "Microsoft.Graph.Users.Actionst" -ListAvailable

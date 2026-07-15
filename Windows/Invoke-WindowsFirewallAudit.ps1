@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Audits listening ports against staged inbound firewall rules.
+
+.DESCRIPTION
+    Cross-references the machine's actively listening ports with the inbound Windows
+    Firewall rules that are staged, so you can spot ports that are open with no matching
+    rule (or rules with nothing behind them). Writes a report to
+    C:\Support\Firewall_Audit_<hostname>.txt.
+
+.NOTES
+    Author: Amanda Hunt
+    Run locally with admin rights.
+#>
+
 # Listening Ports vs Staged Inbound Rules
 # Run this locally with admin rights
 # Output saved to C:\Support\Firewall_Audit_<hostname>.txt
