@@ -54,6 +54,7 @@ macOS/                     macOS monitoring
 | `Report-SharePointTempFiles.ps1` | Reports orphaned SharePoint `~$` Office temp files across listed sites to a CSV | PnP.PowerShell |
 | `Remove-SharePointFilesFromCSV.ps1` | Bulk recycles SharePoint files from a CSV of full URLs, grouped by site collection | PnP.PowerShell, Entra ID app registration |
 | `Set-TemporaryO365Passwords.ps1` | Sets temporary passwords for users via Microsoft Graph | Microsoft.Graph |
+| `Get-O365MFAStatusReport.ps1` | Exports per-user MFA registration status to CSV and summarizes users (and admins) without MFA | Microsoft.Graph.Reports |
 | `Enroll-IntuneAzureADDevice.ps1` | Forces Intune (MDM) enrollment on an Entra ID joined Windows device by creating the MDM enrollment registry values and launching the built-in enrollment | Runs as SYSTEM; user signed in |
 
 ## Windows
@@ -71,6 +72,11 @@ macOS/                     macOS monitoring
 | `Set-EdgeHomepage.ps1` | Sets the Microsoft Edge home button / startup page via policy registry keys | Elevated |
 | `Install-WingetUpgrade.ps1` | Installs winget (App Installer) if missing, otherwise upgrades it | Elevated |
 | `Get-MonitoredCertificate.ps1` | Retrieves the SSL certificate for a given HTTPS URL and writes expiration data to NinjaOne custom fields | NinjaOne custom fields |
+| `Test-PendingReboot.ps1` | RMM condition — checks CBS, Windows Update, and pending-rename flags plus uptime; exit 1 when a reboot is pending | None |
+| `Get-DiskSpaceReport.ps1` | Free-space table for all fixed drives; exit 1 if any drop below the threshold (default 15%) | None |
+| `Get-InstalledSoftware.ps1` | Software inventory from the uninstall registry keys (avoids `Win32_Product`), with name filter and CSV export | None |
+| `Get-LocalAdminAudit.ps1` | Lists local Administrators members (with orphaned-SID fallback) and local accounts with password age flags | Elevated |
+| `Clear-PrintQueue.ps1` | Bounces the Print Spooler and empties the spool folder — the stuck-print-job fix | Elevated |
 
 ## Vulnerability-Remediations
 
@@ -85,6 +91,10 @@ macOS/                     macOS monitoring
 | Script | Description |
 |--------|-------------|
 | `monitor-last-update.sh` | Retrieves the most recent macOS install/update date and version, calculates days since last update, and reports to NinjaOne custom fields |
+| `check-disk-space.sh` | Reports boot-volume free space to NinjaOne custom fields; exit 1 below the GB threshold |
+| `check-filevault-status.sh` | Reports FileVault encryption status to a NinjaOne custom field; exit 1 when encryption is off (run as root) |
+| `check-security-posture.sh` | Checks Gatekeeper, SIP, and the application firewall; exit 1 if anything is disabled |
+| `get-local-admins.sh` | Lists members of the local admin group and reports them to a NinjaOne custom field |
 
 ---
 
@@ -99,7 +109,7 @@ Install-Module ExchangeOnlineManagement
 # SharePoint / PnP scripts
 Install-Module PnP.PowerShell
 
-# Temporary password script
+# Graph scripts (temporary passwords, MFA report)
 Install-Module Microsoft.Graph
 
 # GPO firewall script — install via Windows Features instead
@@ -118,6 +128,7 @@ Install-Module Microsoft.Graph
 | `Get-O365DelegationReport.ps1` | Exchange Online: View-Only Recipients |
 | `Remove-SharePointFilesFromCSV.ps1` | SharePoint: Contribute or above on target sites |
 | `Set-TemporaryO365Passwords.ps1` | Graph: User administrator |
+| `Get-O365MFAStatusReport.ps1` | Graph: AuditLog.Read.All (Reports Reader role) |
 
 ---
 
