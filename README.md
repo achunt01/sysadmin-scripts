@@ -56,6 +56,8 @@ macOS/                     macOS monitoring
 | `Set-TemporaryO365Passwords.ps1` | Sets temporary passwords for users via Microsoft Graph | Microsoft.Graph |
 | `Get-O365MFAStatusReport.ps1` | Exports per-user MFA registration status to CSV and summarizes users (and admins) without MFA | Microsoft.Graph.Reports |
 | `Enroll-IntuneAzureADDevice.ps1` | Forces Intune (MDM) enrollment on an Entra ID joined Windows device by creating the MDM enrollment registry values and launching the built-in enrollment | Runs as SYSTEM; user signed in |
+| `New-O365User.ps1` | Creates an Entra ID user with a generated one-time temporary password, lists tenant SKUs and available seats, and assigns the selected license when available; reports when CSP purchase is needed | Microsoft.Graph; delegated user, organization, and license permissions |
+| `Disable-O365User.ps1` | Revokes sign-in sessions, blocks sign-in, converts the mailbox to shared, removes removable direct group memberships, and removes directly assigned licenses | Microsoft.Graph, ExchangeOnlineManagement; Graph and Exchange recipient-management permissions |
 
 ## Windows
 
@@ -103,7 +105,7 @@ macOS/                     macOS monitoring
 ### Modules
 
 ```powershell
-# Exchange Online reporting scripts
+# Exchange Online scripts
 Install-Module ExchangeOnlineManagement
 
 # SharePoint / PnP scripts
@@ -129,6 +131,8 @@ Install-Module Microsoft.Graph
 | `Remove-SharePointFilesFromCSV.ps1` | SharePoint: Contribute or above on target sites |
 | `Set-TemporaryO365Passwords.ps1` | Graph: User administrator |
 | `Get-O365MFAStatusReport.ps1` | Graph: AuditLog.Read.All (Reports Reader role) |
+| `New-O365User.ps1` | Graph delegated: User.ReadWrite.All, Organization.Read.All, LicenseAssignment.ReadWrite.All |
+| `Disable-O365User.ps1` | Graph delegated: User.ReadWrite.All, User.RevokeSessions.All, LicenseAssignment.ReadWrite.All, Group.Read.All, GroupMember.ReadWrite.All, RoleManagement.ReadWrite.Directory; Exchange Online recipient-management permissions |
 
 ---
 
@@ -138,6 +142,8 @@ Install-Module Microsoft.Graph
 - Update-related scripts talk to the Windows Update Agent (WUA) COM API directly rather than PSWindowsUpdate, which avoids the `ArgumentException` that occurs when update metadata is malformed.
 - The SharePoint deletion script recycles files rather than permanently deleting them — recovery is possible from the site recycle bin.
 - The .NET remediation scripts refuse to uninstall runtimes that are actively in use, and honor a host-exclusion list.
+- `New-O365User.ps1` uses the supplied email address as the user's UPN, sets UsageLocation to `US`, and displays a generated temporary password once. If the selected SKU has no seat, create the seat through the CSP manually and assign it afterward.
+- `Disable-O365User.ps1` removes direct, cloud-managed group memberships. Dynamic and on-premises-synchronized memberships, plus any remaining group-based licenses, are reported for manual follow-up. Mailbox conversion must succeed before license removal; the script stops before group/license cleanup if the mailbox is over 50 GB, has an archive, or is on hold.
 - Every PowerShell script carries a comment-based help block — run `Get-Help .\ScriptName.ps1` for the synopsis, description, and parameters without opening the file.
 
 ---
