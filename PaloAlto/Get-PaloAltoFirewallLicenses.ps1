@@ -13,6 +13,9 @@
 
 .NOTES
     Author: Amanda Hunt
+    Requires the NinjaOne custom fields firewallLicenseExpiration (text)
+    and firewallLicenseExpiringSoon (integer) - create them in NinjaOne
+    before running, or the Ninja-Property-Set calls will fail.
     The API key needs operational access to the license endpoint.
 #>
 
