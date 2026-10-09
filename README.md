@@ -22,6 +22,7 @@ Uninstalls/                Full-removal / cleanup scripts
 O365/                      Microsoft 365 — Exchange Online, SharePoint, Intune, Entra ID
 Windows/                   Windows OS, Update, firewall, browser, and RMM condition scripts
 Vulnerability-Remediations/ .NET runtime cleanup and related remediation
+PaloAlto/                  Palo Alto PAN-OS API utilities (license reporting)
 macOS/                     macOS monitoring
 ```
 
@@ -88,7 +89,17 @@ macOS/                     macOS monitoring
 | `Invoke-DotNetRuntimeCleanup.ps1` | Keeps only the latest patch per .NET / ASP.NET / Hosting Bundle family, removes superseded versions, and skips uninstall for runtimes in active use. Safe for mixed LTS/STS. Supports host exclusions | Elevated |
 | `Uninstall-DotNetAllButLatest.ps1` | Installs the .NET Uninstall Tool if needed and removes all but the latest runtime, ASP.NET runtime, and hosting bundle, plus specified legacy versions. Supports host exclusions | Elevated |
 | `Get-DotNetProcesses.ps1` | Lists running processes that have a specific .NET runtime (e.g. .NET 6) module loaded — useful before removing a runtime | None |
+| `Set-PrintNightmareHardening.ps1` | Sets Point and Print policy values so non-admins always get an elevation prompt for printer driver installs/updates. Idempotent | Elevated |
+| `Set-SpeculativeExecutionMitigations.ps1` | Sets the recommended Memory Management registry values for Spectre/Meltdown/MDS/L1TF mitigations (Hyper-Threading enabled variant). Idempotent | Elevated; reboot to take effect |
+| `Repair-WindowsUnquotedServicePath.ps1` | Finds and quotes unquoted service ImagePaths and uninstall strings (with backup, restore, and WhatIf support). Defaults tuned for unattended RMM runs | Elevated |
 | `Get-DotNetEolDependencies.ps1` | Read-only scan for EOL .NET runtimes (5/6/7) and what still depends on them — installed runtimes, app `runtimeconfig.json` targets, live `dotnet.exe` processes, and services in flagged app folders. Writes a summary to the `netScan` NinjaOne custom field | NinjaOne custom field |
+
+## PaloAlto
+
+| Script | Description | Requirements |
+|--------|-------------|--------------|
+| `Get-PaloAltoFirewallLicenses.ps1` | Pulls license info from a single firewall via the PAN-OS API and writes per-feature detail plus soonest expiration to NinjaOne custom fields | PAN-OS API key; NinjaOne custom fields |
+| `Get-PaloAltoPanoramaFirewallLicenses.ps1` | Pulls license info for every connected firewall via Panorama's API proxy (no per-firewall creds needed) and writes the aggregate to NinjaOne custom fields | Panorama API key; NinjaOne custom fields |
 
 ## macOS
 
