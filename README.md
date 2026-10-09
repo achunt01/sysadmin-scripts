@@ -79,6 +79,7 @@ macOS/                     macOS monitoring
 | `Get-InstalledSoftware.ps1` | Software inventory from the uninstall registry keys (avoids `Win32_Product`), with name filter and CSV export | None |
 | `Get-LocalAdminAudit.ps1` | Lists local Administrators members (with orphaned-SID fallback) and local accounts with password age flags | Elevated |
 | `Clear-PrintQueue.ps1` | Bounces the Print Spooler and empties the spool folder — the stuck-print-job fix | Elevated |
+| `Get-AdobeUserSpecificLicensing.ps1` | Reports the `Enabled` value on Adobe's UserSpecificLicensing and UserSpecificIdentity registry keys, or whether the keys/values are missing | None |
 
 ## Vulnerability-Remediations
 
@@ -87,6 +88,7 @@ macOS/                     macOS monitoring
 | `Invoke-DotNetRuntimeCleanup.ps1` | Keeps only the latest patch per .NET / ASP.NET / Hosting Bundle family, removes superseded versions, and skips uninstall for runtimes in active use. Safe for mixed LTS/STS. Supports host exclusions | Elevated |
 | `Uninstall-DotNetAllButLatest.ps1` | Installs the .NET Uninstall Tool if needed and removes all but the latest runtime, ASP.NET runtime, and hosting bundle, plus specified legacy versions. Supports host exclusions | Elevated |
 | `Get-DotNetProcesses.ps1` | Lists running processes that have a specific .NET runtime (e.g. .NET 6) module loaded — useful before removing a runtime | None |
+| `Get-DotNetEolDependencies.ps1` | Read-only scan for EOL .NET runtimes (5/6/7) and what still depends on them — installed runtimes, app `runtimeconfig.json` targets, live `dotnet.exe` processes, and services in flagged app folders. Writes a summary to the `netScan` NinjaOne custom field | NinjaOne custom field |
 
 ## macOS
 
