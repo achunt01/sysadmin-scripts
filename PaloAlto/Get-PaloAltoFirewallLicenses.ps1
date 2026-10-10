@@ -47,6 +47,13 @@ $allExpirations = @()
 
 # Loop through each license entry in the response
 foreach ($entry in $entries) {
+    # Some licenses say "Never" for expiration - handle that so ParseExact doesn't choke.
+    # Left out of $allExpirations too, since there's no day count to alert on.
+    if ($entry.expires -eq "Never") {
+        $licenseInfo += "$($entry.feature) | Expires On: Never | Expired?: $($entry.expired) | Days Until Expiration: N/A`n"
+        continue
+    }
+
     # Parse license expiration date string into a DateTime object
     $expiresDate = [datetime]::ParseExact($entry.expires, 'MMMM dd, yyyy', $null)
 
