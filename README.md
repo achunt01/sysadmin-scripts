@@ -21,7 +21,8 @@ Installs/                  Software and security-agent deployment
 Uninstalls/                Full-removal / cleanup scripts
 O365/                      Microsoft 365 — Exchange Online, SharePoint, Intune, Entra ID
 Windows/                   Windows OS, Update, firewall, browser, and RMM condition scripts
-Vulnerability-Remediations/ .NET runtime cleanup and related remediation
+Vulnerability-Remediations/ .NET runtime cleanup, PrintNightmare, Spectre/Meltdown, unquoted service paths
+Network/                   Firewall / network appliance monitoring (Palo Alto)
 macOS/                     macOS monitoring
 ```
 
@@ -89,6 +90,16 @@ macOS/                     macOS monitoring
 | `Uninstall-DotNetAllButLatest.ps1` | Installs the .NET Uninstall Tool if needed and removes all but the latest runtime, ASP.NET runtime, and hosting bundle, plus specified legacy versions. Supports host exclusions | Elevated |
 | `Get-DotNetProcesses.ps1` | Lists running processes that have a specific .NET runtime (e.g. .NET 6) module loaded — useful before removing a runtime | None |
 | `Get-DotNetEolDependencies.ps1` | Read-only scan for EOL .NET runtimes (5/6/7) and what still depends on them — installed runtimes, app `runtimeconfig.json` targets, live `dotnet.exe` processes, and services in flagged app folders. Writes a summary to the `netScan` NinjaOne custom field | NinjaOne custom field |
+| `Set-PointAndPrintRestrictions.ps1` | PrintNightmare hardening — sets `NoWarningNoElevationOnInstall` and `UpdatePromptSettings` to 0 so non-admins always get an elevation prompt for printer driver installs/updates. Always exits 0 | Elevated |
+| `Set-SpeculativeExecutionMitigations.ps1` | Sets `FeatureSettingsOverride` / `FeatureSettingsOverrideMask` for the Spectre/Meltdown/MDS/L1TF mitigations plus CVE-2022-0001 (Hyper-Threading enabled variant). Only writes missing or wrong values | Elevated; reboot to apply |
+| `Repair-UnquotedServicePath.ps1` | Fixes Unquoted Service Path Enumeration in service `ImagePath` and uninstall strings, with registry backup/restore, `-WhatIf`, and a log. Modified from Vector BCO's Windows_Path_Enumerate 3.5.1 so a no-parameter RMM run fixes both and backs up first | Elevated; x64 PowerShell on x64 |
+
+## Network
+
+| Script | Description | Requirements |
+|--------|-------------|--------------|
+| `Get-PaloAltoLicenseExpiration.ps1` | Pulls license expirations from a single Palo Alto firewall's XML API and writes them to the `firewallLicenseExpiration` / `firewallLicenseExpiringSoon` NinjaOne custom fields | Firewall API key; NinjaOne custom fields |
+| `Get-PanoramaLicenseExpiration.ps1` | Same as above, but for every connected firewall managed by Panorama — queries each one through Panorama, so only Panorama's API key is needed. Handles `Never`-expiring licenses | Panorama API key; NinjaOne custom fields |
 
 ## macOS
 
@@ -143,6 +154,8 @@ Install-Module Microsoft.Graph
 - RMM-oriented scripts (Ninja) run as SYSTEM and read/write custom fields instead of prompting; they aren't meant for interactive desktop use.
 - Update-related scripts talk to the Windows Update Agent (WUA) COM API directly rather than PSWindowsUpdate, which avoids the `ArgumentException` that occurs when update metadata is malformed.
 - The SharePoint deletion script recycles files rather than permanently deleting them — recovery is possible from the site recycle bin.
+- The Palo Alto scripts ship with blank placeholders for the IP and API key — fill them in on the RMM side and don't commit real keys.
+- `Repair-UnquotedServicePath.ps1` writes its log to `C:\Temp\ServicesFix-3.5.1.Log` and backups to `C:\Temp\PathEnumerationBackup`; restore with `-RestoreBackup`.
 - The .NET remediation scripts refuse to uninstall runtimes that are actively in use, and honor a host-exclusion list.
 - `New-O365User.ps1` uses the supplied email address as the user's UPN, sets UsageLocation to `US`, and displays a generated temporary password once. If the selected SKU has no seat, create the seat through the CSP manually and assign it afterward.
 - `Disable-O365User.ps1` removes direct, cloud-managed group memberships. Dynamic and on-premises-synchronized memberships, plus any remaining group-based licenses, are reported for manual follow-up. Mailbox conversion must succeed before license removal; the script stops before group/license cleanup if the mailbox is over 50 GB, has an archive, or is on hold.
